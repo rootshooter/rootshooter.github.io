@@ -12,3 +12,5 @@ Notable Certifications:
 - CEH
 
 I actively participate in "Capture The Flag" (CTF) events on a regular basis and have achieved the rank of Pro Hacker on [HackTheBox](https://www.hackthebox.com/home/users/profile/167576). I have also developed content on [TryHackMe](https://www.tryhackme.com/jr/beskarnights). 
+
+Welcome to my blog!
