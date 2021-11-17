@@ -134,3 +134,26 @@ Shown in the screenshot above is the exact EIP Offset location returned by patte
 
 #### **Offset Verification**
 Since the program crashed in the last step in the testing process, we will re-open and attach it to Immunity Debugger. We will use the same steps previously listed.
+
+<a href="/images/imdb_1.png"><img src="/images/imdb_1.png"></a>
+
+Now that the program is attached and running in Immunity Debugger, we can develop a script to verify the offset value that we previously discovered. Shown in the screenshot below is the script we will use to verify the EIP Offset value. This script will connect to the target IP and port, send 142 “A’s” followed by 4 “B’s” and a return and newline character, then it closes the connection. This will effectively cause the program to crash and overwrite the EIP with **42424242**.
+
+<a href="/images/verify_py.png"><img src="/images/verify_py.png"></a>
+
+We will execute our EIP Offset verification script using the following command:
+```console
+python verify.py
+```
+<a href="/images/verify.png"><img src="/images/verify.png"></a>
+
+As expected, the program crashes and Immunity pauses the program execution for further inspection. 
+
+<a href="/images/imdb_4.png"><img src="/images/imdb_4.png"></a>
+
+If we take a closer look at the values located within the EIP, we will see **42424242 (4 “B’s”)**. This means that we now control the EIP. This is important to achieve in the exploit development process because now we can control the programs execution. Ultimately, this will allow us to remotely execute commands on the system. Before we can get to that point, we need to fish out the characters that the program rejects.
+
+<a href="/images/imdb_eip_2.png"><img src="/images/imdb_eip_2.png"></a>
+
+#### **Finding Bad Characters**
+This step in the process will allow us to find the characters that the binary rejects (bad characters). We will accomplish by using a script that sends all **255 ASCII characters** in hexadecimal representation to the program at once. It will be fairly obvious to see what characters the program accepts and the ones that it does now. Before we get to that point we will open and attach the binary to Immunity Debugger using the steps previously outlined.
