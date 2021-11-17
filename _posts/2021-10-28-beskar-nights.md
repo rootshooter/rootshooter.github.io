@@ -46,7 +46,7 @@ One of the first things we will check is for the presence of a robots.txt file. 
 
 <a href="/images/robots.png"><img src="/images/robots.png"></a>
 
-There is one entry in the Disallow section: /dev. This is an interesting finding so that is where we will look next.
+There is one entry in the Disallow section: **/dev**. This is an interesting finding so that is where we will look next.
 
 Browsing to http://10.10.130.11/dev/ brings up a directory listing that contains an interesting executable file. It is obvious at this point that the site is still under development and there aren’t many security-focused practices being implemented. This binary seems to be interesting so we will download it to our local system.
 
