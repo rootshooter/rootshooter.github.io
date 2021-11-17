@@ -30,7 +30,7 @@ nc -nv 10.10.130.11 31337
 
 As you can see in the screenshot above, if we enter HELP, the service simply echoes back the user input. Although this is interesting, not knowing what the service is makes it difficult to find vulnerabilities to exploit. In this case, we will move onto the HTTP service running on port 80.
 
-To get an idea what is running on the HTTP service, we will browse to http://10.10.130.11/. Before the page is loaded, a HTTP Basic Authentication window is displayed. The message in the login window says “Restricted Content”.
+To get an idea what is running on the HTTP service, we will browse to **http://10.10.130.11/**. Before the page is loaded, a HTTP Basic Authentication window is displayed. The message in the login window says “Restricted Content”.
 
 <a href="/images/basic.png"><img src="/images/basic.png"></a>
 
@@ -42,13 +42,13 @@ It appears that the target is not using strong password practices because the cr
 
 <a href="/images/index.png"><img src="/images/index.png"></a>
 
-One of the first things we will check is for the presence of a robots.txt file. This is accomplished by browsing to http://10.10.130.11/robots.txt. 
+One of the first things we will check is for the presence of a robots.txt file. This is accomplished by browsing to **http://10.10.130.11/robots.txt**. 
 
 <a href="/images/robots.png"><img src="/images/robots.png"></a>
 
 There is one entry in the Disallow section: **/dev**. This is an interesting finding so that is where we will look next.
 
-Browsing to http://10.10.130.11/dev/ brings up a directory listing that contains an interesting executable file. It is obvious at this point that the site is still under development and there aren’t many security-focused practices being implemented. This binary seems to be interesting so we will download it to our local system.
+Browsing to **http://10.10.130.11/dev/** brings up a directory listing that contains an interesting executable file. It is obvious at this point that the site is still under development and there aren’t many security-focused practices being implemented. This binary seems to be interesting so we will download it to our local system.
 
 <a href="/images/beskarexe.png"><img src="/images/beskarexe.png"></a>
 
