@@ -26,7 +26,9 @@ In order to investigate the interesting service further, we will use Netcat to m
 ```console
 nc -nv 10.10.130.11 31337
 ```
+<p align="center">
 <a href="/images/nc_1.png"><img src="/images/nc_1.png"></a>
+ </p>
 
 As you can see in the screenshot above, if we enter HELP, the service simply echoes back the user input. Although this is interesting, not knowing what the service is makes it difficult to find vulnerabilities to exploit. In this case, we will move onto the HTTP service running on port 80.
 
