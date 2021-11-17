@@ -1,6 +1,6 @@
 ## [localhost ~]$ whoami
 
-I am an active Cybersecurity professional with over 7 years of experience in Security, Networking, and Information Technology. I currently serve as a Security Engineer for the U.S. Army Cyber Command (ARCYBER) and hold an active TS-SCI with Polygraph. 
+I am a Cybersecurity professional with over 7 years of experience in Security, Networking, and Information Technology. I currently serve as a Security Engineer for the U.S. Army Cyber Command (ARCYBER) and hold an active TS-SCI with Polygraph. 
 
 I have completed a Bachelor of Science in Cybersecurity and Information Assurance (BSCIA) at Western Governors University (WGU). Recently, I was nominated by WGU to be inducted into the Alumni Chapter of The National Society of Leadership and Success. Currently, I hold 20 Industry Certifications from vendors such as: Offensive Security, eLearnSecurity, GIAC, CompTIA, (ISC)², and EC-Council.
 
