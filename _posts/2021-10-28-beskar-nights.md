@@ -12,10 +12,10 @@ the tester collects information on the target through active and passive reconna
 case, we will be actively collecting information on the target in the form of a port scan. We will use 
 Nmap to collect open TCP ports, Service Versions, and run scripts against the services detected. To 
 start things off, we will scan the target IP address using the following command:
-```bash
+```console
 sudo nmap -sC -sV -T4 -p- -oN nmap/beskarNights.nmap 10.10.130.11
 ```
-![nmap](https://github.com/rootshooter/rootshooter.github.io/blob/main/_posts/img/beskar/nmap_1.png)
+<p align="center"><a href="/_posts/img/beskar/nmap_1.png"><img src="/_posts/img/beskar/nmap_1.png"></a></p>
 
 There is a lot of valuable information that can be collected from the output of this Nmap scan. First, 
 we can see that the system has TCP ports 80, 2222, and 31337 open and accessible by the public. 
@@ -25,7 +25,8 @@ service version information. Nmap has a hard time identifying the service that i
 31337. Since this is interesting, that is where we will start.
 In order to investigate the interesting service further, we will use Netcat to make a connection and 
 interact with it. To perform this investigation, we will use the following command:
-```bash
+```console
 nc -nv 10.10.130.11 31337
 ```
-![netcat](https://github.com/rootshooter/rootshooter.github.io/blob/main/_posts/img/beskar/nc_1.png)
+<p align="center"><a href="/_posts/img/beskar/nc_1.png"><img src="/_posts/img/beskar/nc_1.png"></a></p>
+
