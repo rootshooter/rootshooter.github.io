@@ -131,3 +131,6 @@ We can now use Metasploit Framework’s pattern_offset.rb to calculate the exact
 <a href="/images/pattern_offset.png"><img src="/images/pattern_offset.png"></a>
 
 Shown in the screenshot above is the exact EIP Offset location returned by pattern_create.rb. We will now verify that the offset we discovered is correct. This will ensure that we can control program execution by gaining control of the EIP.
+
+#### **Offset Verification**
+Since the program crashed in the last step in the testing process, we will re-open and attach it to Immunity Debugger. We will use the same steps previously listed.
