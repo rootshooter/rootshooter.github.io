@@ -28,6 +28,8 @@ interact with it. To perform this investigation, we will use the following comma
 ```console
 nc -nv 10.10.130.11 31337
 ```
+<a href="/images/nc_1.png"><img src="/images/nc_1.png"></a>
+
 As you can see in the screenshot above, if we enter HELP, the service simply echoes back the user input. Although this is interesting, not knowing what the service is makes it difficult to find vulnerabilities to exploit. In this case, we will move onto the HTTP service running on port 80.
 
 To get an idea what is running on the HTTP service, we will browse to http://10.10.130.11/. Before the page is loaded, a HTTP Basic Authentication window is displayed. The message in the login window says “Restricted Content”.
