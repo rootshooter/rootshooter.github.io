@@ -33,3 +33,35 @@ nc -nv 10.10.130.11 31337
 As you can see in the screenshot above, if we enter HELP, the service simply echoes back the user input. Although this is interesting, not knowing what the service is makes it difficult to find vulnerabilities to exploit. In this case, we will move onto the HTTP service running on port 80.
 
 To get an idea what is running on the HTTP service, we will browse to http://10.10.130.11/. Before the page is loaded, a HTTP Basic Authentication window is displayed. The message in the login window says “Restricted Content”.
+
+<a href="/images/basic.png"><img src="/images/basic.png"></a>
+
+This is an interesting finding. It is a good possibility that this site is still under development and the creator implemented an authentication mechanism to keep the contents private. We’ll try some simple username/password combinations to test the password practices of the target. The first and most popular combination we will use is **admin:admin**. 
+
+<a href="/images/auth.png"><img src="/images/auth.png"></a>
+
+It appears that the target is not using strong password practices because the credentials work and we are authenticated to the page!
+
+<a href="/images/index.png"><img src="/images/index.png"></a>
+
+One of the first things we will check is for the presence of a robots.txt file. This is accomplished by browsing to http://10.10.130.11/robots.txt. 
+
+<a href="/images/robots.png"><img src="/images/robots.png"></a>
+
+There is one entry in the Disallow section: /dev. This is an interesting finding so that is where we will look next.
+
+Browsing to http://10.10.130.11/dev/ brings up a directory listing that contains an interesting executable file. It is obvious at this point that the site is still under development and there aren’t many security-focused practices being implemented. This binary seems to be interesting so we will download it to our local system.
+
+<a href="/images/beskarexe.png"><img src="/images/beskarexe.png"></a>
+
+To download the file, we will simply click on the executable and a prompt window will appear asking us what we want to do with the file. In this case, we will select the save option in order to download it to the local system.
+
+<a href="/images/download.png"><img src="/images/download.png"></a>
+
+Now that we have a copy on our local system, we can inspect its behavior in more detail by transferring it to a Windows system.
+
+### Exploit Development
+The first thing we will do is run the program to check the behavior. Normally, running a random executable file found online would be a bad practice. Since this is being run in a virtual environment that is contained to a local network, it is safe to do. The reason it is a bad practice is you could potentially introduce malware into your system or network if you are not careful. Use common sense when dealing with executables found online!
+
+#### Fuzzing
+Once we have the executable transferred to our Windows system, we will run it to check out what it does.
