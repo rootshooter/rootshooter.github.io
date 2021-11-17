@@ -65,3 +65,8 @@ The first thing we will do is run the program to check the behavior. Normally, r
 Once we have the executable transferred to our Windows system, we will run it to check out what it does.
 
 <a href="/images/run_1.png"><img src="/images/run_1.png"></a>
+
+The program spawns a window and appears to be listening for incoming connections. Without decompiling the executable to see what port it is listening on; we can assume that it is listening on TCP port 31337. This is a valid assumption because of the weird service Nmap failed to identify earlier in the process. This can be checked by attempting to make a connection to the program on port 31337 from our Kali instance. We will use the following command to make the connection:
+```console
+nc -nv 192.168.110.129 31337
+```
