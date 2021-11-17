@@ -132,65 +132,91 @@ Now that the program is attached and running in Immunity Debugger, we can develo
 ```console
 /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 300
 ```
+<p align="center">
 <a href="/images/pattern_create.png"><img src="/images/pattern_create.png"></a>
+ </p>
 
 Shown in the screenshot below is the script we will use to perform the offset finding portion of the test. It makes a connection to the target IP and port, sends the pattern with a return and newline character added, and closes the connection. 
 
+<p align="center">
 <a href="/images/finder_py.png"><img src="/images/finder_py.png"></a>
+ </p>
 
 We will run this against the binary running on the Windows system using the following command:
 ```console
 python finder.py
 ```
+<p align="center">
 <a href="/images/finder.png"><img src="/images/finder.png"></a>
+ </p>
 
 As we expected, the program crashes and Immunity Debugger catches the crash; pausing the program execution.
 
+<p align="center">
 <a href="/images/imdb_3.png"><img src="/images/imdb_3.png"></a>
+ </p>
 
 We can take a closer look at the value located within the EIP on the Registers pane. In this case, the value is 65413765. We will copy this value to our clipboard to calculate the EIP Offset.
 
+<p align="center">
 <a href="/images/imdb_eip.png"><img src="/images/imdb_eip.png"></a>
+ </p>
 
 We can now use Metasploit Framework’s pattern_offset.rb to calculate the exact offset location of the EIP. This can be done using the following command:
 ```console
 /usr/share/metasploit-framework/tools/exploit/pattern_offset.rb -l 300 -q 65413765
 ```
+<p align="center">
 <a href="/images/pattern_offset.png"><img src="/images/pattern_offset.png"></a>
+ </p>
 
 Shown in the screenshot above is the exact EIP Offset location returned by pattern_create.rb. We will now verify that the offset we discovered is correct. This will ensure that we can control program execution by gaining control of the EIP.
 
 #### **Offset Verification**
 Since the program crashed in the last step in the testing process, we will re-open and attach it to Immunity Debugger. We will use the same steps previously listed.
 
+<p align="center">
 <a href="/images/imdb_1.png"><img src="/images/imdb_1.png"></a>
-
+ </p>
+<p align="center">
 <a href="/images/imdb_2.png"><img src="/images/imdb_2.png"></a>
+ </p>
 
 Now that the program is attached and running in Immunity Debugger, we can develop a script to verify the offset value that we previously discovered. Shown in the screenshot below is the script we will use to verify the EIP Offset value. This script will connect to the target IP and port, send 142 “A’s” followed by 4 “B’s” and a return and newline character, then it closes the connection. This will effectively cause the program to crash and overwrite the EIP with **42424242**.
 
+<p align="center">
 <a href="/images/verify_py.png"><img src="/images/verify_py.png"></a>
+ </p>
 
 We will execute our EIP Offset verification script using the following command:
 ```console
 python verify.py
 ```
+<p align="center">
 <a href="/images/verify.png"><img src="/images/verify.png"></a>
+ </p>
 
 As expected, the program crashes and Immunity pauses the program execution for further inspection. 
 
+<p align="center">
 <a href="/images/imdb_4.png"><img src="/images/imdb_4.png"></a>
+ </p>
 
 If we take a closer look at the values located within the EIP, we will see **42424242 (4 “B’s”)**. This means that we now control the EIP. This is important to achieve in the exploit development process because now we can control the programs execution. Ultimately, this will allow us to remotely execute commands on the system. Before we can get to that point, we need to fish out the characters that the program rejects.
 
+<p align="center">
 <a href="/images/imdb_eip_2.png"><img src="/images/imdb_eip_2.png"></a>
+ </p>
 
 #### **Finding Bad Characters**
 This step in the process will allow us to find the characters that the binary rejects (bad characters). We will accomplish by using a script that sends all **255 ASCII characters** in hexadecimal representation to the program at once. It will be fairly obvious to see what characters the program accepts and the ones that it does now. Before we get to that point we will open and attach the binary to Immunity Debugger using the steps previously outlined.
 
+<p align="center">
 <a href="/images/imdb_1.png"><img src="/images/imdb_1.png"></a>
-
+ </p>
+<p align="center">
 <a href="/images/imdb_2.png"><img src="/images/imdb_2.png"></a>
+ </p>
 
 Now that the program is attached and running, let’s take a look at our bad character hunting script. Shown below is the script that we will use for this part of the process.
 
@@ -215,9 +241,12 @@ In terms of exploit development, it can be assumed that **\x00** is always going
 #### **Finding the Return Address**
 Before we can get into shell code generation and creating an exploitation proof of concept, we need to find the return address for **JMP ESP**. This will allow us to execute our shellcode in the exact location necessary to gain Remote Code Execution on the target system. We will accomplish this task using **mona.py** integrated into our Immunity Debugger install. In order to begin this process, we first need to open and attach the program in Immunity using the steps previously listed.
 
+<p align="center">
 <a href="/images/imdb_1.png"><img src="/images/imdb_1.png"></a>
-
+ </p>
+<p align="center">
 <a href="/images/imdb_2.png"><img src="/images/imdb_2.png"></a>
+ </p>
 
 Now that the program is loaded and running, we will search for the return address for JMP ESP that does not contain any of the bad characters that we found in the last step. We will do this by executing the following command within Immunity Debugger:
 ```console
@@ -230,9 +259,12 @@ There is some valuable information that we can collect from the screenshot above
 #### **Local Exploitation**
 To start things off, we will open and attach the program to Immunity Debugger using the steps previously listed.
 
+<p align="center">
 <a href="/images/imdb_1.png"><img src="/images/imdb_1.png"></a>
-
+ </p>
+<p align="center">
 <a href="/images/imdb_2.png"><img src="/images/imdb_2.png"></a>
+ </p>
 
 We will now use MSFVenom to generate custom shell code to plug into our proof of concept. The command we will use is as follows:
 ```console
