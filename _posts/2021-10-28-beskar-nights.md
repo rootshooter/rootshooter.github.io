@@ -15,7 +15,7 @@ start things off, we will scan the target IP address using the following command
 ```console
 sudo nmap -sC -sV -T4 -p- -oN nmap/beskarNights.nmap 10.10.130.11
 ```
-
+<a href="/images/nmap_1.png"><img src="/images/nmap_1.png"></a>
 There is a lot of valuable information that can be collected from the output of this Nmap scan. First, 
 we can see that the system has TCP ports 80, 2222, and 31337 open and accessible by the public. 
 BESKAR NIGHTS 
