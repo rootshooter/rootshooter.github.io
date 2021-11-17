@@ -63,3 +63,5 @@ The first thing we will do is run the program to check the behavior. Normally, r
 
 #### Fuzzing
 Once we have the executable transferred to our Windows system, we will run it to check out what it does.
+
+<a href="/images/run_1.png"><img src="/images/run_1.png"></a>
