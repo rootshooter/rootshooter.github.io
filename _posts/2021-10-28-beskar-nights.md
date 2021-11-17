@@ -28,6 +28,4 @@ interact with it. To perform this investigation, we will use the following comma
 ```bash
 nc -nv 10.10.130.11 31337
 ```
-<p align="center">
-  <img width="600" height="200" src="https://github.com/rootshooter/rootshooter.github.io/blob/main/_posts/img/beskar/nc_1.png">
-</p>
+![netcat](https://github.com/rootshooter/rootshooter.github.io/blob/main/_posts/img/beskar/nc_1.png)
